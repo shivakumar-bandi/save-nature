@@ -1,19 +1,16 @@
 const multer = require('multer');
-const path = require('path');
+const multerS3 = require('multer-s3');
+const s3 = require('../config/awsConfig');
 
-// Set storage options
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, 'uploads/');
-    },
-    filename: function (req, file, cb) {
-        cb(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
-    }
-});
-
-// Set upload limits (e.g., 5MB)
 const upload = multer({
-    storage: storage,
+    storage: multerS3({
+        s3: s3,
+        bucket: process.env.S3_BUCKET_NAME,
+        acl: 'public-read',
+        key: function (req, file, cb) {
+            cb(null, `uploads/${Date.now()}_${file.originalname}`);
+        }
+    }),
     limits: { fileSize: 5 * 1024 * 1024 } // 5 MB
 }).single('image');
 

@@ -5,7 +5,7 @@ const upload = require('../middleware/upload');
 exports.createArticle = (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            return res.status(400).json({ message: err });
+            return res.status(400).json({ message: err.message });
         }
 
         const { title, author, content } = req.body;
@@ -19,7 +19,7 @@ exports.createArticle = (req, res) => {
                 title,
                 author,
                 content,
-                image: req.file.path
+                image: req.file.location // URL from S3
             });
 
             await newArticle.save();
@@ -60,7 +60,7 @@ exports.getArticleById = async (req, res) => {
 exports.updateArticle = (req, res) => {
     upload(req, res, async (err) => {
         if (err) {
-            return res.status(400).json({ message: err });
+            return res.status(400).json({ message: err.message });
         }
 
         const { title, author, content } = req.body;
@@ -75,7 +75,7 @@ exports.updateArticle = (req, res) => {
             article.author = author || article.author;
             article.content = content || article.content;
             if (req.file) {
-                article.image = req.file.path;
+                article.image = req.file.location; // URL from S3
             }
 
             await article.save();
